@@ -3,6 +3,7 @@
 
 #include "Eigen/Dense"
 #include "measurement_package.h"
+#include <bits/stdc++.h>
 
 class UKF {
  public:
@@ -120,7 +121,7 @@ class UKF {
   // NIS for lidar
   double nis_lidar_;
 
-  bool debug_;
+  bool additional_info_;
 
 };
 
