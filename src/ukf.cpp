@@ -10,6 +10,9 @@ using namespace std;
 /**
  * Initializes Unscented Kalman filter
  */
+
+// Done 
+
 UKF::UKF() {
   // if this is false, laser measurements will be ignored (except during init)
   use_laser_ = true;
@@ -109,10 +112,10 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    */
 
   if(!is_initialized_){
-    if(additional_info_) cout << "UKF::ProcessMeasurement() - Initializing" << std::endl;
+    if(additional_info_) cout << "[ProcessMeasurement] Initializing" << std::endl;
 
     if(meas_package.sensor_type_ == MeasurementPackage::RADAR){
-      if(additional_info_) cout << "UKF::ProcessMeasurement() - Initializing with RADAR" << std::endl;
+      if(additional_info_) cout << "[ProcessMeasurement] - Initializing with RADAR" << std::endl;
       double rho = meas_package.raw_measurements_[0];
       double phi = meas_package.raw_measurements_[1];
       double rho_dot = meas_package.raw_measurements_[2];
@@ -125,7 +128,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
       x_ << px, py, v, 0, 0;
     } else if(meas_package.sensor_type_ == MeasurementPackage::LASER){
-      if(additional_info_) cout << "UKF::ProcessMeasurement() - Initializing with LASER" << std::endl;
+      if(additional_info_) cout << "[ProcessMeasurement] - Initializing with LASER" << std::endl;
       double px = meas_package.raw_measurements_[0];
       double py = meas_package.raw_measurements_[1];
 
@@ -138,8 +141,8 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
           0, 0, 0 ,1, 0,
           0, 0, 0, 0, 1;
 
-    cout << "UKF::ProcessMeasurement() - Initialized x_ = " << x_ << std::endl;
-    cout << "UKF::ProcessMeasurement() - Initialized P_ = " << P_ << std::endl;
+    cout << "[ProcessMeasurement] - Initialized x_ = " << x_ << std::endl;
+    cout << "[ProcessMeasurement] - Initialized P_ = " << P_ << std::endl;
     
 
     time_us_ = meas_package.timestamp_;
@@ -150,16 +153,16 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
   double delta_t = (meas_package.timestamp_ - time_us_) / 1000000.0;
   time_us_ = meas_package.timestamp_;
-  cout << "UKF::ProcessMeasurement() - delta_t = " << delta_t << std::endl;
+  cout << "[ProcessMeasurement] - delta_t = " << delta_t << std::endl;
 
   Prediction(delta_t);
-  cout << "UKF::ProcessMeasurement() - Prediction done" << std::endl;
+  cout << "[ProcessMeasurement] - Prediction done" << std::endl;
 
   if(meas_package.sensor_type_ == MeasurementPackage::RADAR){
-    cout << "UKF::ProcessMeasurement() - Update Radar" << std::endl;
+    cout << "[ProcessMeasurement] - Update Radar" << std::endl;
     UpdateRadar(meas_package);
   } else if(meas_package.sensor_type_ == MeasurementPackage::LASER){
-    cout << "UKF::ProcessMeasurement() - Update Lidar" << std::endl;
+    cout << "[ProcessMeasurement] - Update Lidar" << std::endl;
     UpdateLidar(meas_package);
   }
 
@@ -251,8 +254,8 @@ void UKF::Prediction(double delta_t) {
     P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
   }
 
-  cout << "UKF::Prediction() - x_ = " << x_ << std::endl;
-  cout << "UKF::Prediction() - P_ = " << P_ << std::endl;
+  cout << "[Prediction] - x_ = " << x_ << std::endl;
+  cout << "[Prediction] - P_ = " << P_ << std::endl;
 
 }
 
@@ -313,8 +316,8 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   x_ = x_ + K * z_diff;
   P_ = P_ - K * S * K.transpose();
 
-  cout << "UKF::UpdateLidar() - x_ = " << x_ << std::endl;
-  cout << "UKF::UpdateLidar() - P_ = " << P_ << std::endl;
+  cout << "[UpdateLidar] - x_ = " << x_ << std::endl;
+  cout << "[UpdateLidar] - P_ = " << P_ << std::endl;
 
   nis_lidar_ = z_diff.transpose() * S.inverse() * z_diff;
 
@@ -395,8 +398,8 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   x_ = x_ + K * z_diff;
   P_ = P_ - K * S * K.transpose();
 
-  cout << "UKF::UpdateRadar() - x_ = " << x_ << std::endl;
-  cout << "UKF::UpdateRadar() - P_ = " << P_ << std::endl;
+  cout << "[UpdateRadar] - x_ = " << x_ << std::endl;
+  cout << "[UpdateRadar] - P_ = " << P_ << std::endl;
 
   nis_radar_ = z_diff.transpose() * S.inverse() * z_diff;
 }
