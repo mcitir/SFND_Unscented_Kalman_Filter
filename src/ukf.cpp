@@ -1,6 +1,7 @@
 #include "ukf.h"
 #include "Eigen/Dense"
 #include <iostream>
+#include <bits/stdc++.h>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -23,10 +24,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 30;
+  std_a_ = 2.2;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 30;
+  std_yawdd_ = 1.0;
   
   /**
    * DO NOT MODIFY measurement noise values below.
@@ -59,12 +60,17 @@ UKF::UKF() {
 
   is_initialized_ = false;
 
+  // set state dimension
   n_x_ = 5;
+
+  // set augmented dimension
   n_aug_ = 7;
   lambda_ = 3 - n_aug_;
 
+  // Sigma points
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
+  // Weights
   weights_ = VectorXd(2 * n_aug_ + 1);
   weights_.fill(0.5 / (lambda_ + n_aug_));
   weights_(0) = lambda_ / (lambda_ + n_aug_);
@@ -80,9 +86,9 @@ UKF::UKF() {
   R_lidar_(0, 0) = std_laspx_ * std_laspx_;
   R_lidar_(1, 1) = std_laspy_ * std_laspy_;
 
-  debug_ = false;
+  additional_info_ = false;
 
-  if(debug_) {
+  if(additional_info_) {
     cout << "UKF::UKF()" << std::endl;
     cout << "n_x_ = " << n_x_ << std::endl;
     cout << "n_aug_ = " << n_aug_ << std::endl;
@@ -103,10 +109,10 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
    */
 
   if(!is_initialized_){
-    if(debug_) cout << "UKF::ProcessMeasurement() - Initializing" << std::endl;
+    if(additional_info_) cout << "UKF::ProcessMeasurement() - Initializing" << std::endl;
 
     if(meas_package.sensor_type_ == MeasurementPackage::RADAR){
-      if(debug_) cout << "UKF::ProcessMeasurement() - Initializing with RADAR" << std::endl;
+      if(additional_info_) cout << "UKF::ProcessMeasurement() - Initializing with RADAR" << std::endl;
       double rho = meas_package.raw_measurements_[0];
       double phi = meas_package.raw_measurements_[1];
       double rho_dot = meas_package.raw_measurements_[2];
@@ -119,15 +125,15 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 
       x_ << px, py, v, 0, 0;
     } else if(meas_package.sensor_type_ == MeasurementPackage::LASER){
-      if(debug_) cout << "UKF::ProcessMeasurement() - Initializing with LASER" << std::endl;
+      if(additional_info_) cout << "UKF::ProcessMeasurement() - Initializing with LASER" << std::endl;
       double px = meas_package.raw_measurements_[0];
       double py = meas_package.raw_measurements_[1];
 
       x_ << px, py, 0, 0, 0;
     }
 
-    P_ << 1, 0, 0, 0, 0,
-          0, 1, 0 ,0, 0,
+    P_ << std_laspx_*std_laspx_, 0, 0, 0, 0,
+          0, std_laspy_*std_laspy_, 0 ,0, 0,
           0, 0, 1, 0, 0,
           0, 0, 0 ,1, 0,
           0, 0, 0, 0, 1;
